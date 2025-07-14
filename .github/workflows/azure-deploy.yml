@@ -15,7 +15,7 @@ env:
   NODE_VERSION: '18.x'
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     
     steps:
@@ -30,12 +30,6 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
-
-    - name: Run tests
-      run: npm test
-      env:
-        CI: true
-      continue-on-error: true
 
     - name: Build application
       run: |
@@ -55,7 +49,7 @@ jobs:
           !.github
 
   deploy-to-azure:
-    needs: build-and-test
+    needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     

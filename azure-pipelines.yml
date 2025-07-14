@@ -6,13 +6,13 @@ pool:
 
 variables:
   # Azure Configuration
-  resourceGroupName: 'expressaid-backend-rg'
-  appServicePlanName: 'expressaid-backend-plan'
-  webAppName: 'expressaid-backend'
-  location: 'East US'
+  resourceGroupName: 'express_aid'
+  appServicePlanName: 'ASP-expressaidwebsite-ac89 (B1: 1)'
+  webAppName: 'ExpressAidBackend'
+  location: 'Central India '
   
   # Application Configuration
-  nodeVersion: '18.x'
+  nodeVersion: '22.x'
   
   # Environment Variables (these will be set in Azure App Service)
   NODE_ENV: 'production'

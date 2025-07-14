@@ -70,7 +70,6 @@ jobs:
       with:
         app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
         package: .
-        startup-command: 'npm start'
 
     - name: Health check
       run: |

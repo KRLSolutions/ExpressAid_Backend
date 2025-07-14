@@ -59,12 +59,33 @@ CASHFREE_ENV=TEST
 SMS_SERVICE=aws-sns
 ```
 
-## Step 3: Get Publish Profile
+## Step 3: Create Azure Service Principal
 
-1. In Azure Portal, go to your Web App
-2. Click "Get publish profile"
-3. Download the `.publishsettings` file
-4. Open the file and copy the content
+You need to create a service principal for GitHub Actions to authenticate with Azure.
+
+### Option A: Using the provided script
+
+```bash
+# Run the setup script (if you have Azure CLI)
+./setup-azure-credentials.sh
+```
+
+### Option B: Manual creation
+
+```bash
+# Login to Azure
+az login
+
+# Create service principal
+az ad sp create-for-rbac \
+    --name "expressaid-github-actions" \
+    --description "Service Principal for ExpressAid GitHub Actions deployment" \
+    --role contributor \
+    --scopes /subscriptions/YOUR_SUBSCRIPTION_ID \
+    --sdk-auth
+```
+
+This will output JSON credentials. Save this output securely.
 
 ## Step 4: Configure GitHub Secrets
 
@@ -75,14 +96,24 @@ In your GitHub repository:
 3. Add these secrets:
 
 ### Required Secrets:
+- `AZURE_CREDENTIALS`: The JSON output from the service principal creation
 - `AZURE_WEBAPP_NAME`: Your Azure Web App name (e.g., `expressaid-backend`)
-- `AZURE_WEBAPP_PUBLISH_PROFILE`: The content of your publish profile file
 
-### Optional Secrets (for additional features):
-- `AZURE_SUBSCRIPTION_ID`: Your Azure subscription ID
-- `AZURE_TENANT_ID`: Your Azure tenant ID
-- `AZURE_CLIENT_ID`: Service principal client ID
-- `AZURE_CLIENT_SECRET`: Service principal client secret
+### Example AZURE_CREDENTIALS format:
+```json
+{
+  "clientId": "your-client-id",
+  "clientSecret": "your-client-secret",
+  "subscriptionId": "your-subscription-id",
+  "tenantId": "your-tenant-id",
+  "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+  "resourceManagerEndpointUrl": "https://management.azure.com/",
+  "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+  "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+  "galleryEndpointUrl": "https://gallery.azure.com/",
+  "managementEndpointUrl": "https://management.core.windows.net/"
+}
+```
 
 ## Step 5: Push to GitHub
 
@@ -117,10 +148,15 @@ https://your-webapp-name.azurewebsites.net/api/health
 
 ### Common Issues:
 
-1. **Build Fails**: Check the GitHub Actions logs for specific errors
-2. **App Won't Start**: Check Azure Web App logs in the portal
-3. **Environment Variables**: Ensure all required env vars are set in Azure
-4. **Port Issues**: Make sure your app listens on `process.env.PORT`
+1. **Authentication Fails**: 
+   - Check that AZURE_CREDENTIALS secret is correctly formatted
+   - Ensure the service principal has contributor role
+   - Verify the subscription ID matches your Azure subscription
+
+2. **Build Fails**: Check the GitHub Actions logs for specific errors
+3. **App Won't Start**: Check Azure Web App logs in the portal
+4. **Environment Variables**: Ensure all required env vars are set in Azure
+5. **Port Issues**: Make sure your app listens on `process.env.PORT`
 
 ### Useful Commands:
 
@@ -133,6 +169,9 @@ az webapp restart --name your-webapp-name --resource-group your-resource-group
 
 # View app settings
 az webapp config appsettings list --name your-webapp-name --resource-group your-resource-group
+
+# Test service principal
+az login --service-principal -u YOUR_CLIENT_ID -p YOUR_CLIENT_SECRET --tenant YOUR_TENANT_ID
 ```
 
 ## Security Best Practices
@@ -142,6 +181,7 @@ az webapp config appsettings list --name your-webapp-name --resource-group your-
 3. **Set up monitoring and alerts**
 4. **Regular security updates**
 5. **Use service principals** instead of personal accounts for CI/CD
+6. **Rotate service principal credentials** regularly
 
 ## Cost Optimization
 

@@ -11,7 +11,8 @@ This workflow automatically:
 - Triggers on push to `main` or `master` branch
 - Sets up Node.js 18.x environment
 - Installs dependencies
-- Runs tests
+- Builds the application
+- Authenticates with Azure using service principal
 - Deploys to Azure Web App
 - Includes health checks
 
@@ -27,6 +28,7 @@ Configures IIS to properly handle your Node.js application with:
 **Files**: 
 - `deploy-azure.sh` - For local deployment
 - `setup-azure.sh` - For initial Azure setup
+- `setup-azure-credentials.sh` - For creating Azure service principal
 
 ### 4. Documentation
 **Files**:
@@ -48,14 +50,31 @@ Or manually create in Azure Portal:
 3. Choose Node.js 18 LTS runtime
 4. Use Linux OS
 
-### Step 2: Configure GitHub Secrets
+### Step 2: Create Azure Service Principal
+Run the credentials setup script:
+```bash
+# This will create azure-credentials.json
+./setup-azure-credentials.sh
+```
+
+Or manually create using Azure CLI:
+```bash
+az ad sp create-for-rbac \
+    --name "expressaid-github-actions" \
+    --description "Service Principal for ExpressAid GitHub Actions deployment" \
+    --role contributor \
+    --scopes /subscriptions/YOUR_SUBSCRIPTION_ID \
+    --sdk-auth
+```
+
+### Step 3: Configure GitHub Secrets
 In your GitHub repository → Settings → Secrets and variables → Actions:
 
 **Required Secrets:**
+- `AZURE_CREDENTIALS`: The JSON output from service principal creation (content of azure-credentials.json)
 - `AZURE_WEBAPP_NAME`: Your Azure Web App name (e.g., `expressaid-backend`)
-- `AZURE_WEBAPP_PUBLISH_PROFILE`: Content of your publish profile file
 
-### Step 3: Push to GitHub
+### Step 4: Push to GitHub
 ```bash
 git add .
 git commit -m "Add Azure deployment workflow"
@@ -106,16 +125,21 @@ Test endpoints:
 
 ### Common Issues:
 
-1. **Build Fails**
+1. **Authentication Fails**
+   - Check that AZURE_CREDENTIALS secret is correctly formatted
+   - Ensure the service principal has contributor role
+   - Verify the subscription ID matches your Azure subscription
+
+2. **Build Fails**
    - Check GitHub Actions logs
    - Ensure all dependencies are in `package.json`
 
-2. **App Won't Start**
+3. **App Won't Start**
    - Check Azure Web App logs
    - Verify environment variables are set
    - Ensure app listens on `process.env.PORT`
 
-3. **Environment Variables**
+4. **Environment Variables**
    - Double-check all required variables are set in Azure
    - Use Azure Key Vault for sensitive data
 
@@ -130,6 +154,9 @@ az webapp restart --name your-webapp-name --resource-group your-resource-group
 
 # View settings
 az webapp config appsettings list --name your-webapp-name --resource-group your-resource-group
+
+# Test service principal
+az login --service-principal -u YOUR_CLIENT_ID -p YOUR_CLIENT_SECRET --tenant YOUR_TENANT_ID
 ```
 
 ## 🛡️ Security Best Practices
@@ -139,6 +166,7 @@ az webapp config appsettings list --name your-webapp-name --resource-group your-
 3. **Set up monitoring and alerts**
 4. **Regular security updates**
 5. **Use service principals** for CI/CD
+6. **Rotate service principal credentials** regularly
 
 ## 💰 Cost Optimization
 
@@ -163,6 +191,7 @@ If you encounter issues:
 2. Review GitHub Actions logs in your repository
 3. Check Azure Web App logs in the portal
 4. Verify all environment variables are set correctly
+5. Ensure Azure service principal has proper permissions
 
 ## 🎉 Success!
 

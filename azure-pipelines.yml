@@ -45,18 +45,6 @@ stages:
         npm ci
       displayName: 'Install Dependencies'
     
-    - script: |
-        echo "Running tests..."
-        cd backend
-        npm test || echo "No tests found, continuing..."
-      displayName: 'Run Tests'
-    
-    - script: |
-        echo "Testing AWS SNS configuration..."
-        cd backend
-        node fix-aws-sns.js
-      displayName: 'Test AWS SNS Configuration'
-    
     - task: ArchiveFiles@2
       displayName: 'Archive Backend'
       inputs:

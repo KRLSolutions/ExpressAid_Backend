@@ -17,6 +17,8 @@ app.use(cors({
   origin: [
     'http://localhost:3000', 
     'http://192.168.0.3:3000', 
+    'http://192.168.100.11:5000',
+    'http://192.168.100.9:5000',
     'exp://192.168.0.3:8081',
     'http://10.0.2.2:5000',  // Android emulator localhost
     'http://localhost:5000',  // Local development
@@ -113,8 +115,9 @@ app.get('/api/gemini-models', async (req, res) => {
 });
 
 // Import and use the cashfree route
-const cashfree = require('./routes/cashfree');
-app.use('/api', cashfree);
+const cashfreeRoutes = require('./routes/cashfree');
+app.use('/api', cashfreeRoutes); // This means full route becomes /api/cashfree/create-order
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -129,7 +132,7 @@ app.use('*', (req, res) => {
 
 // Set your Gemini API key in the environment: process.env.GEMINI_API_KEY
 
-const PORT = config.port;
+const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 module.exports = app; 

@@ -119,7 +119,6 @@ async function runTests() {
   console.log('1. Verify AWS credentials are correct');
   console.log('2. Set up AWS SNS spending limits');
   console.log('3. Test with real phone number');
-  console.log('4. Deploy to Azure with proper environment variables');
 }
 
 // Run tests

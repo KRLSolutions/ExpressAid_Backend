@@ -7,7 +7,7 @@ const CASHFREE_CLIENT_ID = 'TEST10393719a08909e07f6157a7221e91739301';
 const CASHFREE_CLIENT_SECRET = 'cfsk_ma_test_d81a3c09420dcde848287e6b7aacfca5_3f2bf834';
 const CASHFREE_API_BASE = 'https://sandbox.cashfree.com/pg';
 
-router.post('/cashfree/create-order', async (req, res) => {
+router.post('/create-order', async (req, res) => {
   try {
     const { orderAmount, customerId, customerPhone, customerEmail, returnUrl } = req.body;
 

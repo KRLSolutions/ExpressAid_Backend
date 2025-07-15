@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const config = require('../config');
-const awsSnsService = require('../services/awsSnsService');
+const twilioSmsService = require('../services/twilioSmsService');
 const router = express.Router();
 
 // Generate OTP
@@ -42,7 +42,7 @@ router.post('/send-otp', async (req, res) => {
 
     // Send OTP via SMS
     const message = `Your ExpressAid verification code is: ${otp}. Valid for 10 minutes.`;
-    const smsResult = await awsSnsService.sendSMS(phoneNumber, message);
+    const smsResult = await twilioSmsService.sendSMS(phoneNumber, message);
 
     console.log(`📱 OTP sent to ${phoneNumber}: ${otp}`);
 
@@ -50,7 +50,7 @@ router.post('/send-otp', async (req, res) => {
       success: true,
       message: 'OTP sent successfully',
       phoneNumber: phoneNumber,
-      smsProvider: smsResult.messageId.includes('console') ? 'console' : 'aws-sns'
+      smsProvider: smsResult.messageId.includes('console') ? 'console' : 'twilio'
     });
 
   } catch (error) {

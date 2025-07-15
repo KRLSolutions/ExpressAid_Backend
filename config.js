@@ -18,12 +18,14 @@ const config = {
   },
   
   // SMS Service
-  SMS_SERVICE: 'aws-sns', // console, aws-sns, twilio
+  SMS_SERVICE: 'twilio', // console, aws-sns, twilio
   
-  // Twilio Config (alternative)
-  TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
-  TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
-  TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER,
+  // Twilio Config
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID || 'your_twilio_account_sid',
+    authToken: process.env.TWILIO_AUTH_TOKEN || 'your_twilio_auth_token',
+    phoneNumber: process.env.TWILIO_PHONE_NUMBER || '+1234567890'
+  },
   
   // Cashfree Configuration
   cashfree: {

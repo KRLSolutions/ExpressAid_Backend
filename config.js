@@ -31,7 +31,7 @@ const config = {
   cashfree: {
     appId: process.env.CASHFREE_APP_ID || 'TEST10393719a08909e07f6157a7221e91739301',
     secretKey: process.env.CASHFREE_SECRET_KEY || 'cfsk_ma_test_d81a3c09420dcde848287e6b7aacfca5_3f2bf834',
-    environment: process.env.CASHFREE_ENV || 'TEST'
+    environment: process.env.CASHFREE_ENV || 'SANDBOX'  // Changed from 'TEST' to 'SANDBOX'
   }
 };
 

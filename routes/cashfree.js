@@ -5,6 +5,18 @@ const { Cashfree } = require('cashfree-pg');
 const config = require('../config');
 
 // Initialize Cashfree SDK
+console.log('🔧 Initializing Cashfree SDK with config:', {
+  clientId: config.cashfree.appId,
+  clientSecret: config.cashfree.secretKey.substring(0, 10) + '...',
+  environment: config.cashfree.environment
+});
+
+console.log('🔍 Environment variables check:', {
+  CASHFREE_APP_ID: process.env.CASHFREE_APP_ID,
+  CASHFREE_SECRET_KEY: process.env.CASHFREE_SECRET_KEY ? process.env.CASHFREE_SECRET_KEY.substring(0, 10) + '...' : 'NOT SET',
+  CASHFREE_ENV: process.env.CASHFREE_ENV
+});
+
 const cashfree = new Cashfree({
   clientId: config.cashfree.appId,
   clientSecret: config.cashfree.secretKey,

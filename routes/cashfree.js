@@ -7,7 +7,7 @@ const CASHFREE_CLIENT_ID = 'TEST10393719a08909e07f6157a7221e91739301';
 const CASHFREE_CLIENT_SECRET = 'cfsk_ma_test_d81a3c09420dcde848287e6b7aacfca5_3f2bf834';
 const CASHFREE_API_BASE = 'https://sandbox.cashfree.com/pg';
 
-router.post('/create-order', async (req, res) => {
+router.post('/cashfree/create-order', async (req, res) => {
   try {
     const { orderAmount, customerId, customerPhone, customerEmail, returnUrl } = req.body;
 
@@ -41,8 +41,10 @@ router.post('/create-order', async (req, res) => {
     const { order_id, payment_session_id } = response.data;
 
     res.json({
-      orderId: order_id,
-      paymentSessionId: payment_session_id
+      data: {
+        order_id: order_id,
+        payment_session_id: payment_session_id
+      }
     });
   } catch (error) {
     console.error('Cashfree error:', error.response?.data || error.message);
@@ -53,45 +55,6 @@ router.post('/create-order', async (req, res) => {
   }
 });
 
-// UPI session links endpoint
-router.post('/upi-session', async (req, res) => {
-  try {
-    const { paymentSessionId, paymentMethod } = req.body;
 
-    const upiPayload = {
-      payment_session_id: paymentSessionId,
-      payment_method: {
-        upi: {
-          channel: paymentMethod === 'phonepe' ? 'phonepe' : 'gpay'
-        }
-      }
-    };
-
-    const response = await axios.post(
-      `${CASHFREE_API_BASE}/sessions/${paymentSessionId}/payment_methods/upi/links`,
-      upiPayload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-client-id': CASHFREE_CLIENT_ID,
-          'x-client-secret': CASHFREE_CLIENT_SECRET,
-          'x-api-version': '2022-09-01',
-        }
-      }
-    );
-
-    res.json({
-      success: true,
-      data: response.data
-    });
-  } catch (error) {
-    console.error('UPI session error:', error.response?.data || error.message);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get UPI session links',
-      details: error.response?.data || error.message
-    });
-  }
-});
 
 module.exports = router;

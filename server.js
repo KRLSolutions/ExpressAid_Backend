@@ -114,7 +114,9 @@ app.get('/api/gemini-models', async (req, res) => {
   }
 });
 
-app.use('/api/cashfree', require('./routes/cashfree'));
+// Import and use the cashfree route
+const cashfreeRoutes = require('./routes/cashfree');
+app.use('/api', cashfreeRoutes); // This means full route becomes /api/cashfree/create-order
 
 // Error handling middleware
 app.use((err, req, res, next) => {

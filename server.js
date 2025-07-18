@@ -114,7 +114,6 @@ app.get('/api/gemini-models', async (req, res) => {
   }
 });
 
-const cashfree = require('./routes/cashfree');
 app.use('/api/cashfree', require('./routes/cashfree'));
 
 // Error handling middleware

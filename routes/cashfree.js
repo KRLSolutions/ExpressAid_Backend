@@ -1,56 +1,64 @@
 // routes/cashfree.js
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const { Cashfree } = require('cashfree-pg');
+const config = require('../config');
 
-const CASHFREE_CLIENT_ID = 'TEST10393719a08909e07f6157a7221e91739301';
-const CASHFREE_CLIENT_SECRET = 'cfsk_ma_test_d81a3c09420dcde848287e6b7aacfca5_3f2bf834';
-const CASHFREE_API_BASE = 'https://sandbox.cashfree.com/pg';
+// Initialize Cashfree SDK
+const cashfree = new Cashfree({
+  clientId: config.cashfree.appId,
+  clientSecret: config.cashfree.secretKey,
+  environment: config.cashfree.environment
+});
 
 router.post('/cashfree/create-order', async (req, res) => {
   try {
     const { orderAmount, customerId, customerPhone, customerEmail, returnUrl } = req.body;
 
+    console.log('🎯 Creating Cashfree order with SDK:', {
+      orderAmount,
+      customerId,
+      customerPhone,
+      customerEmail,
+      returnUrl
+    });
+
     const orderPayload = {
-      order_id: `order_${Date.now()}`,
-      order_amount: orderAmount,
-      order_currency: 'INR',
-      customer_details: {
-        customer_id: customerId,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
+      orderId: `order_${Date.now()}`,
+      orderAmount: orderAmount,
+      orderCurrency: 'INR',
+      customerDetails: {
+        customerId: customerId,
+        customerEmail: customerEmail,
+        customerPhone: customerPhone,
       },
-      order_meta: {
-        return_url: returnUrl || 'https://yourfrontend.com/payment-success',
+      orderMeta: {
+        returnUrl: returnUrl || 'https://yourfrontend.com/payment-success',
       }
     };
 
-    const response = await axios.post(
-      `${CASHFREE_API_BASE}/orders`,
-      orderPayload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-client-id': CASHFREE_CLIENT_ID,
-          'x-client-secret': CASHFREE_CLIENT_SECRET,
-          'x-api-version': '2022-09-01',
-        }
-      }
-    );
+    console.log('📤 SDK Order Payload:', JSON.stringify(orderPayload, null, 2));
 
-    const { order_id, payment_session_id } = response.data;
+    const result = await cashfree.PGCreateOrder(orderPayload);
+    
+    console.log('✅ SDK Response:', JSON.stringify(result, null, 2));
 
     res.json({
       data: {
-        order_id: order_id,
-        payment_session_id: payment_session_id
+        order_id: result.orderId,
+        payment_session_id: result.paymentSessionId
       }
     });
   } catch (error) {
-    console.error('Cashfree error:', error.response?.data || error.message);
+    console.error('❌ Cashfree SDK error:', error);
+    console.error('📋 Error details:', {
+      message: error.message,
+      code: error.code,
+      type: error.type
+    });
     res.status(500).json({
       error: 'Failed to create Cashfree order',
-      details: error.response?.data || error.message
+      details: error.message || 'Unknown error'
     });
   }
 });

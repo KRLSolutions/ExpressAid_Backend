@@ -27,10 +27,10 @@ const config = {
     phoneNumber: process.env.TWILIO_PHONE_NUMBER || '+1234567890'
   },
   
-  // Cashfree Configuration
+  // Cashfree Configuration - Updated with fresh test credentials
   cashfree: {
-    appId: process.env.CASHFREE_APP_ID || '',
-    secretKey: process.env.CASHFREE_SECRET_KEY || '',
+    appId: process.env.CASHFREE_APP_ID || 'TEST10393719a08909e07f6157a7221e91739301',
+    secretKey: process.env.CASHFREE_SECRET_KEY || 'cfsk_ma_test_07ffbecee7c174a4d047a39fbfeebf89_558ecf63',
     environment: process.env.CASHFREE_ENV || 'SANDBOX'
   }
 };

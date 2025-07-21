@@ -2,8 +2,8 @@ const { Cashfree, CFEnvironment } = require('cashfree-pg');
 
 // Test credentials from config
 const config = {
-  appId: 'YOUR_APP_ID_HERE',
-  secretKey: 'YOUR_SECRET_KEY_HERE',
+  appId: 'TEST10393719a08909e07f6157a7221e91739301',
+  secretKey: 'cfsk_ma_test_07ffbecee7c174a4d047a39fbfeebf89_558ecf63',
   environment: 'SANDBOX'
 };
 

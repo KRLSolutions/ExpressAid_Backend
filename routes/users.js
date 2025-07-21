@@ -227,15 +227,26 @@ router.get('/cart', authenticateToken, async (req, res) => {
 router.post('/cart', authenticateToken, async (req, res) => {
   try {
     const { cart } = req.body;
+    console.log('Received cart data:', cart);
+    console.log('User object:', req.user);
+    
     if (!Array.isArray(cart)) {
       return res.status(400).json({ error: 'Cart must be an array' });
     }
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      req.user._id,
-      { cart },
-      { new: true }
-    );
-    res.json({ message: 'Cart updated successfully', cart: updatedUser.cart });
+    
+    // Handle both MongoDB and in-memory database
+    if (req.user.save && typeof req.user.save === 'function') {
+      // MongoDB user object
+      req.user.cart = cart;
+      await req.user.save();
+      console.log('Cart updated successfully for MongoDB user:', req.user.userId);
+    } else {
+      // In-memory user object - update directly
+      req.user.cart = cart;
+      console.log('Cart updated successfully for in-memory user:', req.user.userId);
+    }
+    
+    res.json({ message: 'Cart updated successfully', cart: req.user.cart });
   } catch (error) {
     console.error('Update cart error:', error);
     res.status(500).json({ error: 'Failed to update cart' });

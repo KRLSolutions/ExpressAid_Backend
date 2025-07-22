@@ -73,4 +73,41 @@ router.get('/test', (req, res) => {
   });
 });
 
+// Check payment status endpoint
+router.get('/payment-status/:orderId', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    console.log('🔍 Checking payment status for order:', orderId);
+    
+    // For now, we'll simulate payment verification
+    // In a real implementation, you would check with your payment provider
+    // or verify the transaction in your database
+    
+    // Simulate different payment statuses based on order ID
+    const isCompleted = orderId.includes('completed') || Math.random() > 0.7; // 30% success rate for testing
+    
+    const status = isCompleted ? 'completed' : 'pending';
+    
+    console.log('📊 Payment status for', orderId, ':', status);
+    
+    res.json({
+      success: true,
+      data: {
+        orderId,
+        status,
+        timestamp: new Date().toISOString(),
+        message: status === 'completed' ? 'Payment completed successfully' : 'Payment is pending'
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Payment status check failed:', error);
+    res.status(500).json({
+      error: 'Failed to check payment status',
+      details: error.message || 'Unknown error'
+    });
+  }
+});
+
 module.exports = router; 

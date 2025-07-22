@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const config = {
-  port: process.env.PORT || 5000,
+  port: process.env.PORT || 5001,
   jwtSecret: '057bed89eb41d8de095d6419121b9edc5685025a154893bb26c2dc41b65e67c7254cbe8202c4654deef8514fc158404ef6952736b54953ce0b4b2f484267853f',
   environment: process.env.NODE_ENV || 'development',
   
@@ -18,7 +18,7 @@ const config = {
   },
   
   // SMS Service
-  SMS_SERVICE: 'twilio', // console, aws-sns, twilio
+  SMS_SERVICE: 'console', // console, aws-sns, twilio (using console for development)
   
   // Twilio Config
   twilio: {

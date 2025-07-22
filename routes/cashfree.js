@@ -32,7 +32,7 @@ try {
   cashfree = null;
 }
 
-// Cashfree UPI Payment Integration - Following Official Documentation
+// Enhanced Cashfree UPI Payment Integration - Supports all UPI apps
 router.post('/create-upi-order', async (req, res) => {
   try {
     const { orderAmount, customerId, customerPhone, customerEmail, paymentMethod } = req.body;
@@ -99,7 +99,8 @@ router.post('/create-upi-order', async (req, res) => {
           order_status: "ACTIVE",
           payment_url: mockPaymentUrl,
           is_mock: true,
-          message: "Mock payment session created for development"
+          message: "Mock payment session created for development",
+          supported_payment_methods: ["phonepe", "googlepay", "paytm", "bhim", "upi"]
         }
       });
     }
@@ -120,7 +121,9 @@ router.post('/create-upi-order', async (req, res) => {
         payment_session_id: result.data.payment_session_id,
         order_status: result.data.order_status,
         payment_url: result.data.payment_url,
-        is_mock: false
+        is_mock: false,
+        supported_payment_methods: ["phonepe", "googlepay", "paytm", "bhim", "upi", "netbanking", "card"],
+        message: "Order created successfully. User can pay using any UPI app or payment method."
       }
     });
 
@@ -153,13 +156,14 @@ router.post('/create-upi-order', async (req, res) => {
         order_status: "ACTIVE",
         payment_url: mockPaymentUrl,
         is_mock: true,
-        message: "Mock payment session created due to Cashfree error"
+        message: "Mock payment session created due to Cashfree error",
+        supported_payment_methods: ["phonepe", "googlepay", "paytm", "bhim", "upi"]
       }
     });
   }
 });
 
-// Get UPI payment URL for specific payment method
+// Enhanced UPI URL generation for specific payment methods
 router.post('/get-upi-url', async (req, res) => {
   try {
     const { orderAmount, customerId, customerPhone, customerEmail, paymentMethod } = req.body;
@@ -208,6 +212,9 @@ router.post('/get-upi-url', async (req, res) => {
       case 'paytm':
         upiUrl = `upi://pay?pa=${businessUpiId}&pn=${appName}&am=${amount}&tr=${transactionRef}&tn=ExpressAid Payment - ${transactionRef}&cu=INR&app=paytm`;
         break;
+      case 'bhim':
+        upiUrl = `upi://pay?pa=${businessUpiId}&pn=${appName}&am=${amount}&tr=${transactionRef}&tn=ExpressAid Payment - ${transactionRef}&cu=INR&app=bhim`;
+        break;
       default:
         upiUrl = `upi://pay?pa=${businessUpiId}&pn=${appName}&am=${amount}&tr=${transactionRef}&tn=ExpressAid Payment - ${transactionRef}&cu=INR`;
     }
@@ -228,7 +235,9 @@ router.post('/get-upi-url', async (req, res) => {
         transactionRef,
         amount,
         businessUpiId: businessUpiId.substring(0, 10) + '...', // Partial for security
-        paymentMethod: paymentMethod || 'upi'
+        paymentMethod: paymentMethod || 'upi',
+        supportedApps: ['phonepe', 'googlepay', 'paytm', 'bhim', 'any upi app'],
+        message: `UPI URL generated for ${paymentMethod || 'any UPI app'}`
       }
     });
 
@@ -237,6 +246,123 @@ router.post('/get-upi-url', async (req, res) => {
     res.status(500).json({
       error: 'Failed to generate UPI URL',
       details: error.message || 'Unknown error'
+    });
+  }
+});
+
+// New endpoint: Get Cashfree payment session for all UPI apps
+router.post('/create-payment-session', async (req, res) => {
+  try {
+    const { orderAmount, customerId, customerPhone, customerEmail } = req.body;
+
+    console.log('🎯 Creating Cashfree payment session for all UPI apps:', {
+      orderAmount,
+      customerId,
+      customerPhone,
+      customerEmail
+    });
+
+    // Validate required fields
+    if (!orderAmount || !customerId || !customerPhone) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        details: 'orderAmount, customerId, and customerPhone are required'
+      });
+    }
+
+    // Validate amount
+    const amount = parseFloat(orderAmount);
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({
+        error: 'Invalid amount',
+        details: 'orderAmount must be a positive number'
+      });
+    }
+
+    // Generate unique order ID
+    const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Create order payload
+    const orderPayload = {
+      order_id: orderId,
+      order_amount: amount,
+      order_currency: "INR",
+      customer_details: {
+        customer_id: customerId,
+        customer_name: customerId,
+        customer_email: customerEmail || `${customerId}@expressaid.com`,
+        customer_phone: customerPhone,
+      },
+      order_meta: {
+        return_url: "https://expressaid.com/payment-success",
+        notify_url: "https://expressaid.centralus.cloudapp.azure.com:5000/api/cashfree/webhook"
+      },
+      order_note: "ExpressAid Healthcare Services - UPI Payment"
+    };
+
+    if (!cashfree) {
+      // Mock response
+      const mockPaymentUrl = `https://sandbox.cashfree.com/pg/view/payment/mock_session_${orderId}`;
+      
+      return res.json({
+        success: true,
+        data: {
+          order_id: orderId,
+          payment_session_id: `mock_session_${orderId}`,
+          payment_url: mockPaymentUrl,
+          is_mock: true,
+          supported_payment_methods: [
+            "phonepe", "googlepay", "paytm", "bhim", "upi", 
+            "netbanking", "card", "wallet", "emi"
+          ],
+          message: "Mock payment session created. Supports all UPI apps and payment methods."
+        }
+      });
+    }
+
+    // Create order using Cashfree SDK
+    const result = await cashfree.PGCreateOrder(orderPayload);
+    
+    console.log('✅ Cashfree payment session created successfully:', {
+      orderId: result.data.order_id,
+      sessionId: result.data.payment_session_id
+    });
+
+    res.json({
+      success: true,
+      data: {
+        order_id: result.data.order_id,
+        payment_session_id: result.data.payment_session_id,
+        payment_url: result.data.payment_url,
+        is_mock: false,
+        supported_payment_methods: [
+          "phonepe", "googlepay", "paytm", "bhim", "upi", 
+          "netbanking", "card", "wallet", "emi"
+        ],
+        message: "Payment session created successfully. User can pay using any UPI app or payment method."
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Payment session creation failed:', error);
+    
+    // Return mock response for development
+    const orderId = `mock_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const mockPaymentUrl = `https://sandbox.cashfree.com/pg/view/payment/mock_session_${orderId}`;
+    
+    res.json({
+      success: true,
+      data: {
+        order_id: orderId,
+        payment_session_id: `mock_session_${orderId}`,
+        payment_url: mockPaymentUrl,
+        is_mock: true,
+        supported_payment_methods: [
+          "phonepe", "googlepay", "paytm", "bhim", "upi", 
+          "netbanking", "card", "wallet", "emi"
+        ],
+        message: "Mock payment session created due to Cashfree error"
+      }
     });
   }
 });
@@ -262,8 +388,8 @@ router.post('/cashfree/create-order', async (req, res) => {
   return router.handle(req, res);
 });
 
-// Webhook endpoint for Cashfree notifications
-router.post('/cashfree/webhook', async (req, res) => {
+// Enhanced webhook endpoint for Cashfree notifications
+router.post('/webhook', async (req, res) => {
   try {
     console.log('🔔 Cashfree webhook received:', req.body);
     
@@ -280,7 +406,17 @@ router.post('/cashfree/webhook', async (req, res) => {
     // TODO: Update order status in your database
     // await updateOrderStatus(orderId, orderStatus);
     
-    res.json({ success: true, message: 'Webhook processed successfully' });
+    // Log payment method used
+    if (paymentMode) {
+      console.log(`💳 Payment completed via: ${paymentMode}`);
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Webhook processed successfully',
+      orderId,
+      status: orderStatus
+    });
   } catch (error) {
     console.error('❌ Webhook error:', error);
     res.status(500).json({ error: 'Webhook processing failed' });
@@ -321,7 +457,11 @@ router.get('/test-credentials', async (req, res) => {
       message: 'Credentials are working!',
       data: {
         order_id: result.data.order_id,
-        session_id: result.data.payment_session_id
+        session_id: result.data.payment_session_id,
+        supported_payment_methods: [
+          "phonepe", "googlepay", "paytm", "bhim", "upi", 
+          "netbanking", "card", "wallet", "emi"
+        ]
       }
     });
 

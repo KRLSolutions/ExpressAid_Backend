@@ -110,6 +110,68 @@ router.post('/generate-upi-url', async (req, res) => {
   }
 });
 
+// NEW: Direct UPI payment endpoint that opens UPI app
+router.post('/upi-payment', async (req, res) => {
+  try {
+    const { orderAmount, customerId, customerPhone, customerEmail, paymentMethod } = req.body;
+
+    console.log('🎯 Direct UPI Payment:', {
+      orderAmount,
+      customerId,
+      customerPhone,
+      paymentMethod
+    });
+
+    // Validate required fields
+    if (!orderAmount || !customerId || !customerPhone) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        details: 'orderAmount, customerId, and customerPhone are required'
+      });
+    }
+
+    // Validate amount
+    const amount = parseFloat(orderAmount);
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({
+        error: 'Invalid amount',
+        details: 'orderAmount must be a positive number'
+      });
+    }
+
+    // Generate unique transaction reference
+    const transactionRef = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Get business UPI ID from environment (secure)
+    const businessUpiId = process.env.BUSINESS_UPI_ID || '9346048610-2@axl'; // Default for testing
+    
+    // Create secure UPI URL
+    const upiUrl = `upi://pay?pa=${businessUpiId}&pn=ExpressAid&am=${amount}&tr=${transactionRef}&tn=Payment for ExpressAid services - Order ${transactionRef}&cu=INR`;
+    
+    console.log('📱 Direct UPI Payment URL:', upiUrl);
+    console.log('📱 Transaction Ref:', transactionRef);
+
+    // Return the UPI URL for the frontend to open
+    res.json({
+      success: true,
+      data: {
+        upiUrl,
+        transactionRef,
+        amount,
+        paymentMethod: paymentMethod || 'upi',
+        message: 'UPI payment URL generated successfully. Open this URL to complete payment.'
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Direct UPI payment failed:', error);
+    res.status(500).json({
+      error: 'Failed to generate UPI payment',
+      details: error.message || 'Unknown error'
+    });
+  }
+});
+
 router.post('/cashfree/create-order', async (req, res) => {
   try {
     const { orderAmount, customerId, customerPhone, customerEmail, returnUrl, paymentMethod } = req.body;

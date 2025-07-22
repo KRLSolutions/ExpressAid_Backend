@@ -118,6 +118,10 @@ app.get('/api/gemini-models', async (req, res) => {
 const cashfreeRoutes = require('./routes/cashfree');
 app.use('/api', cashfreeRoutes); // This means full route becomes /api/cashfree/create-order
 
+// Import and use the UPI payment route
+const upiRoutes = require('./routes/upi');
+app.use('/api/upi', upiRoutes); // This means full route becomes /api/upi/payment
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);

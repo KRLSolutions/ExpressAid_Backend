@@ -3,13 +3,11 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const config = require('../config');
 const twilioSmsService = require('../services/twilioSmsService');
-const consoleSmsService = require('../services/consoleSmsService');
 const router = express.Router();
 
 // Generate OTP
 function generateOTP() {
-  // For development, always return 123456
-  return '123456';
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 // Send OTP via SMS
@@ -44,9 +42,7 @@ router.post('/send-otp', async (req, res) => {
 
     // Send OTP via SMS
     const message = `Your ExpressAid verification code is: ${otp}. Valid for 10 minutes.`;
-    
-    // Use console SMS service for development
-    const smsResult = await consoleSmsService.sendSMS(phoneNumber, message);
+    const smsResult = await twilioSmsService.sendSMS(phoneNumber, message);
 
     console.log(`📱 OTP sent to ${phoneNumber}: ${otp}`);
 
@@ -54,8 +50,7 @@ router.post('/send-otp', async (req, res) => {
       success: true,
       message: 'OTP sent successfully',
       phoneNumber: phoneNumber,
-      smsProvider: 'console',
-      otp: otp // Include OTP in response for development
+      smsProvider: smsResult.messageId.includes('console') ? 'console' : 'twilio'
     });
 
   } catch (error) {

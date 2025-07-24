@@ -4,8 +4,7 @@ const mongoDBService = require('./MongoDBService');
 
 // Check if MongoDB is available
 const isMongoAvailable = () => {
-  // Check if MongoDB service is connected OR if mongoose is directly connected
-  return mongoDBService.isConnected() || mongoose.connection.readyState === 1;
+  return mongoDBService.isConnected();
 };
 
 const userSchema = new mongoose.Schema({
@@ -165,22 +164,7 @@ class User {
 // Static methods
 User.findOne = async function(query) {
   if (isMongoAvailable()) {
-    try {
-      const result = await UserModel.findOne(query);
-      return result;
-    } catch (error) {
-      console.error('MongoDB findOne error:', error);
-      // Fallback to in-memory if MongoDB fails
-      if (query.phoneNumber) {
-        const result = await inMemoryDB.findUserByPhone(query.phoneNumber);
-        return result ? new User(result) : null;
-      }
-      if (query.userId) {
-        const result = await inMemoryDB.findUserByUserId(query.userId);
-        return result ? new User(result) : null;
-      }
-      return null;
-    }
+    return UserModel.findOne(query);
   } else {
     if (query.phoneNumber) {
       const result = await inMemoryDB.findUserByPhone(query.phoneNumber);

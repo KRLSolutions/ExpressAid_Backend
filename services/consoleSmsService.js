@@ -1,31 +1,36 @@
-class ConsoleSMSService {
-  constructor() {
-    this._isConfigured = true;
+class ConsoleSmsService {
+  async sendOTP(phoneNumber, otp) {
+    console.log(`📱 [SMS] OTP sent to ${phoneNumber}: ${otp}`);
+    console.log(`📱 [SMS] Message: "Your ExpressAid verification code is: ${otp}. Valid for 10 minutes."`);
+    
+    return {
+      success: true,
+      message: 'OTP logged to console (development mode)',
+      provider: 'console'
+    };
   }
 
-  async sendSMS(phoneNumber, message) {
-    try {
-      console.log('\n' + '='.repeat(60));
-      console.log('📱 SMS SENT (Console Mode)');
-      console.log('='.repeat(60));
-      console.log(`📞 To: ${phoneNumber}`);
-      console.log(`💬 Message: ${message}`);
-      console.log('='.repeat(60));
-      console.log('⚠️  IMPORTANT: This is console mode - no real SMS sent');
-      console.log('   For testing, use the OTP code shown above');
-      console.log('='.repeat(60) + '\n');
-
-      return { success: true, messageId: 'console-sms-' + Date.now() };
-
-    } catch (error) {
-      console.error('❌ Console SMS Error:', error);
-      return { success: false, messageId: 'error', error: error.message };
-    }
+  async sendWelcomeMessage(phoneNumber, userName) {
+    console.log(`📱 [SMS] Welcome message sent to ${phoneNumber}`);
+    console.log(`📱 [SMS] Message: "Welcome to ExpressAid, ${userName}! Your account has been successfully created."`);
+    
+    return {
+      success: true,
+      message: 'Welcome message logged to console (development mode)',
+      provider: 'console'
+    };
   }
 
-  isConfigured() {
-    return this._isConfigured;
+  async sendOrderConfirmation(phoneNumber, orderDetails) {
+    console.log(`📱 [SMS] Order confirmation sent to ${phoneNumber}`);
+    console.log(`📱 [SMS] Message: "Your ExpressAid order #${orderDetails.orderId} has been confirmed. Total: ₹${orderDetails.total}. Expected delivery: ${orderDetails.estimatedDelivery}"`);
+    
+    return {
+      success: true,
+      message: 'Order confirmation logged to console (development mode)',
+      provider: 'console'
+    };
   }
 }
 
-module.exports = new ConsoleSMSService(); 
+module.exports = new ConsoleSmsService(); 

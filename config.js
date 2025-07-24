@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const config = {
-  port: process.env.PORT || 5001,
+  port: process.env.PORT || 5000,
   jwtSecret: '057bed89eb41d8de095d6419121b9edc5685025a154893bb26c2dc41b65e67c7254cbe8202c4654deef8514fc158404ef6952736b54953ce0b4b2f484267853f',
   environment: process.env.NODE_ENV || 'development',
   
@@ -18,7 +18,7 @@ const config = {
   },
   
   // SMS Service
-  SMS_SERVICE: 'console', // console, aws-sns, twilio (using console for development)
+  SMS_SERVICE: 'twilio', // console, aws-sns, twilio
   
   // Twilio Config
   twilio: {
@@ -27,11 +27,11 @@ const config = {
     phoneNumber: process.env.TWILIO_PHONE_NUMBER || '+1234567890'
   },
   
-  // Cashfree Configuration - Updated with fresh test credentials
+  // Cashfree Configuration
   cashfree: {
     appId: process.env.CASHFREE_APP_ID || 'TEST10393719a08909e07f6157a7221e91739301',
-    secretKey: process.env.CASHFREE_SECRET_KEY || 'cfsk_ma_test_07ffbecee7c174a4d047a39fbfeebf89_558ecf63',
-    environment: process.env.CASHFREE_ENV || 'SANDBOX'
+    secretKey: process.env.CASHFREE_SECRET_KEY || 'cfsk_ma_test_d81a3c09420dcde848287e6b7aacfca5_3f2bf834',
+    environment: process.env.CASHFREE_ENV || 'TEST'
   }
 };
 

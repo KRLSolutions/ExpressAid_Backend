@@ -17,18 +17,12 @@ app.use(cors({
   origin: [
     'http://localhost:3000', 
     'http://192.168.0.3:3000', 
-    'http://192.168.0.9:3000',  // Your PC's IP
     'http://192.168.100.11:5000',
     'http://192.168.100.9:5000',
     'exp://192.168.0.3:8081',
-    'exp://192.168.0.9:8081',   // Your PC's IP for Expo
-    'http://10.0.2.2:5000',     // Android emulator localhost
-    'http://localhost:5000',    // Local development
-    'exp://localhost:8081',     // Expo development
-    'http://192.168.0.9:5000',  // Your PC's IP for direct access
-    'http://192.168.0.9:5001',  // Your PC's IP for direct access
-    'http://192.168.0.9:5002',  // Your PC's IP for direct access
-    '*'  // Allow all origins for React Native development
+    'http://10.0.2.2:5000',  // Android emulator localhost
+    'http://localhost:5000',  // Local development
+    'exp://localhost:8081'    // Expo development
   ],
   credentials: true
 }));
@@ -120,13 +114,8 @@ app.get('/api/gemini-models', async (req, res) => {
   }
 });
 
-// Import and use the cashfree route
-const cashfreeRoutes = require('./routes/cashfree');
-app.use('/api/cashfree', cashfreeRoutes); // This means full route becomes /api/cashfree/create-order
-
-// Import and use the UPI payment route
-const upiRoutes = require('./routes/upi');
-app.use('/api/upi', upiRoutes); // This means full route becomes /api/upi/payment
+const cashfree = require('./routes/cashfree');
+app.use('/api/cashfree', require('./routes/cashfree'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -141,13 +130,7 @@ app.use('*', (req, res) => {
 
 // Set your Gemini API key in the environment: process.env.GEMINI_API_KEY
 
-const PORT = 5001;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌐 Accessible at:`);
-  console.log(`   - Local: http://localhost:${PORT}`);
-  console.log(`   - Network: http://192.168.0.9:${PORT}`);
-  console.log(`   - API: http://192.168.0.9:${PORT}/api`);
-});
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 module.exports = app; 

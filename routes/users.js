@@ -62,6 +62,18 @@ router.post('/addresses', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Name is required' });
     }
 
+    // Check for duplicate address type
+    const addressType = type.toLowerCase().trim();
+    const existingAddress = req.user.addresses.find(
+      addr => addr.type.toLowerCase().trim() === addressType
+    );
+
+    if (existingAddress) {
+      return res.status(409).json({ 
+        error: `An address with type "${type}" already exists. Please choose a different type or update the existing address.` 
+      });
+    }
+
     const newAddress = {
       type: type || 'home',
       address,
@@ -113,6 +125,20 @@ router.put('/addresses/:addressId', authenticateToken, async (req, res) => {
 
     if (addressIndex === -1) {
       return res.status(404).json({ error: 'Address not found' });
+    }
+
+    // Check for duplicate address type if type is being updated
+    if (type) {
+      const addressType = type.toLowerCase().trim();
+      const existingAddress = req.user.addresses.find(
+        (addr, index) => index !== addressIndex && addr.type.toLowerCase().trim() === addressType
+      );
+
+      if (existingAddress) {
+        return res.status(409).json({ 
+          error: `An address with type "${type}" already exists. Please choose a different type.` 
+        });
+      }
     }
 
     // Update address fields

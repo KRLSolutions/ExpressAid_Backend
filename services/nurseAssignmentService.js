@@ -94,9 +94,9 @@ const assignNurseToOrder = async (orderId, orderLocation) => {
     // Select the best nurse (closest with good rating)
     const selectedNurse = availableNurses[0];
     
-    // Calculate estimated arrival time (15-30 minutes based on distance)
-    const baseTime = 15; // 15 minutes base
-    const distanceTime = Math.min(selectedNurse.distance * 2, 15); // 2 min per km, max 15 min
+    // Calculate estimated arrival time (10-25 minutes based on distance)
+    const baseTime = 10; // 10 minutes base
+    const distanceTime = Math.min(selectedNurse.distance * 1.5, 15); // 1.5 min per km, max 15 min
     const estimatedMinutes = Math.round(baseTime + distanceTime);
     const estimatedArrival = new Date(Date.now() + estimatedMinutes * 60 * 1000);
 

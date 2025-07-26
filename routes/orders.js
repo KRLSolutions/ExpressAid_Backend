@@ -59,7 +59,7 @@ router.post('/', authenticateToken, async (req, res) => {
   try {
     const userId = req.user && req.user._id; // Use MongoDB ObjectId, not userId string
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-    const { items, address, total, paymentMethod } = req.body;
+    const { items, address, total, paymentMethod, cashfreeOrderId } = req.body;
     if (!items || !address || !total || !paymentMethod) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -82,6 +82,7 @@ router.post('/', authenticateToken, async (req, res) => {
       address,
       total,
       paymentMethod,
+      cashfreeOrderId,
       status: orderStatus,
       assignedNurse: assignedNurse || undefined,
       notifiedNurses: [],
@@ -192,7 +193,9 @@ router.get('/:orderId/status', authenticateToken, async (req, res) => {
         acceptedAt: order.acceptedAt,
         items: order.items,
         address: order.address,
-        total: order.total
+        total: order.total,
+        paymentMethod: order.paymentMethod,
+        cashfreeOrderId: order.cashfreeOrderId
       }
     });
   } catch (err) {

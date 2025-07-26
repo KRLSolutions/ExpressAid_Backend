@@ -31,6 +31,7 @@ const OrderSchema = new mongoose.Schema({
   },
   total: { type: Number, required: true },
   paymentMethod: { type: String, required: true },
+  cashfreeOrderId: { type: String }, // Store Cashfree order ID for reference
   status: { 
     type: String, 
     enum: ['searching', 'nurse_notified', 'nurse_assigned', 'in_progress', 'completed', 'finished', 'cancelled', 'timeout', 'no_nurses_available'], 

@@ -461,8 +461,8 @@
     "yocto-queue": "^0.1.0"
   },
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node start.js",
+    "dev": "nodemon start.js",
     "test": "jest"
   },
   "keywords": [],

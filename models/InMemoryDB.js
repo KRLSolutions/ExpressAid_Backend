@@ -2,7 +2,9 @@
 class InMemoryDB {
   constructor() {
     this.users = new Map();
+    this.healthMetrics = new Map();
     this.nextUserId = 1;
+    this.nextHealthMetricsId = 1;
   }
 
   // User operations
@@ -58,6 +60,53 @@ class InMemoryDB {
       return this.updateUser(user._id, user);
     } else {
       return this.createUser(user);
+    }
+  }
+
+  // Health Metrics operations
+  async findHealthMetricsByUserId(userId) {
+    for (const [id, healthData] of this.healthMetrics) {
+      if (healthData.userId === userId) {
+        return { ...healthData, _id: id };
+      }
+    }
+    return null;
+  }
+
+  async findHealthMetricsById(id) {
+    const healthData = this.healthMetrics.get(id);
+    return healthData ? { ...healthData, _id: id } : null;
+  }
+
+  async createHealthMetrics(healthData) {
+    const id = this.nextHealthMetricsId++;
+    const healthMetrics = {
+      ...healthData,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.healthMetrics.set(id, healthMetrics);
+    return { ...healthMetrics, _id: id };
+  }
+
+  async updateHealthMetrics(id, updates) {
+    const healthData = this.healthMetrics.get(id);
+    if (!healthData) return null;
+    
+    const updatedHealthData = {
+      ...healthData,
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.healthMetrics.set(id, updatedHealthData);
+    return { ...updatedHealthData, _id: id };
+  }
+
+  async saveHealthMetrics(healthMetrics) {
+    if (healthMetrics._id) {
+      return this.updateHealthMetrics(healthMetrics._id, healthMetrics);
+    } else {
+      return this.createHealthMetrics(healthMetrics);
     }
   }
 }

@@ -95,6 +95,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/places', require('./routes/places'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/maps', require('./routes/maps'));
+app.use('/api/health', require('./routes/health'));
 
 // Import and use the Gemini chat route
 const geminiChat = require('./routes/gemini');

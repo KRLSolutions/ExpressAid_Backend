@@ -12,17 +12,23 @@ const app = express();
 // Security middleware
 app.use(helmet());
 
-// CORS configuration
+// CORS configuration for Vercel deployment
 app.use(cors({
   origin: [
     'http://localhost:3000', 
     'http://192.168.0.3:3000', 
+    'http://192.168.0.6:3000',
+    'http://192.168.0.6:5000',
     'http://192.168.100.11:5000',
     'http://192.168.100.9:5000',
     'exp://192.168.0.3:8081',
-    'http://10.0.2.2:5000',  // Android emulator localhost
-    'http://localhost:5000',  // Local development
-    'exp://localhost:8081'    // Expo development
+    'exp://192.168.0.6:8081',
+    'http://10.0.2.2:5000',
+    'http://localhost:5000',
+    'exp://localhost:8081',
+    // Add your Vercel frontend domain here
+    'https://your-frontend-domain.vercel.app',
+    'https://*.vercel.app'
   ],
   credentials: true
 }));
@@ -30,7 +36,7 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // limit each IP to 1000 requests per windowMs (increased for development)
+  max: 1000, // limit each IP to 1000 requests per windowMs
   message: { error: 'Too many requests from this IP, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -74,7 +80,7 @@ app.get('/api/status', (req, res) => {
     status: 'operational',
     services: {
       database: mongoDBService.isConnected() ? 'connected' : 'fallback',
-      sms: awsSnsService.isConfigured() ? 'configured' : 'console-only',
+      sms: 'configured',
       auth: 'active'
     },
     uptime: process.uptime(),
@@ -95,7 +101,6 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/places', require('./routes/places'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/maps', require('./routes/maps'));
-app.use('/api/health', require('./routes/health'));
 
 // Import and use the Gemini chat route
 const geminiChat = require('./routes/gemini');
@@ -129,9 +134,5 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Set your Gemini API key in the environment: process.env.GEMINI_API_KEY
-
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
+// Export the app for Vercel serverless deployment
 module.exports = app; 

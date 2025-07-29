@@ -287,6 +287,70 @@ router.post('/location', authenticateToken, async (req, res) => {
   }
 });
 
+// Update health profile
+router.post('/update-health-profile', authenticateToken, async (req, res) => {
+  try {
+    const { 
+      name, age, gender, currentSteps, sleepHours, waterIntake, 
+      conditions, medications, allergies 
+    } = req.body;
+
+    // req.user is already the user object from authentication middleware
+    const user = req.user;
+
+    // Update user profile with health data
+    user.name = name || user.name;
+    user.age = age || user.age;
+    user.sex = gender || user.sex; // Note: using sex field from User model
+    user.healthProfile = {
+      currentSteps: currentSteps || 0,
+      sleepHours: sleepHours || 7,
+      waterIntake: waterIntake || 2.5,
+      conditions: conditions || [],
+      medications: medications || [],
+      allergies: allergies || [],
+      lastUpdated: new Date()
+    };
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Health profile updated successfully',
+      data: user.healthProfile
+    });
+  } catch (error) {
+    console.error('Error updating health profile:', error);
+    res.status(500).json({ error: 'Failed to update health profile' });
+  }
+});
+
+// Get health profile
+router.get('/health-profile', authenticateToken, async (req, res) => {
+  try {
+    // req.user is already the user object from authentication middleware
+    const user = req.user;
+    
+    res.json({
+      success: true,
+      data: {
+        name: user.name,
+        age: user.age,
+        gender: user.sex, // Note: using sex field from User model
+        currentSteps: user.healthProfile?.currentSteps || 0,
+        sleepHours: user.healthProfile?.sleepHours || 7,
+        waterIntake: user.healthProfile?.waterIntake || 2.5,
+        conditions: user.healthProfile?.conditions || [],
+        medications: user.healthProfile?.medications || [],
+        allergies: user.healthProfile?.allergies || [],
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching health profile:', error);
+    res.status(500).json({ error: 'Failed to fetch health profile' });
+  }
+});
+
 // Delete user profile
 router.delete('/profile', authenticateToken, async (req, res) => {
   try {

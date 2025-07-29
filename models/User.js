@@ -98,7 +98,24 @@ const userSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     image: { type: String },
     // Add more fields as needed
-  }]
+  }],
+  healthProfile: {
+    currentSteps: { type: Number, default: 0 },
+    sleepHours: { type: Number, default: 7, min: 0, max: 24 },
+    waterIntake: { type: Number, default: 2.5, min: 0, max: 10 }, // in liters
+    conditions: [{ type: String }],
+    medications: [{ type: String }],
+    allergies: [{ type: String }],
+    lastUpdated: { type: Date, default: Date.now }
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 }, {
   timestamps: true
 });
@@ -121,6 +138,15 @@ class User {
     this.otp = data.otp;
     this.addresses = data.addresses || [];
     this.cart = data.cart || [];
+    this.healthProfile = data.healthProfile || {
+      currentSteps: 0,
+      sleepHours: 7,
+      waterIntake: 2.5,
+      conditions: [],
+      medications: [],
+      allergies: [],
+      lastUpdated: new Date()
+    };
     this._id = data._id;
     this.createdAt = data.createdAt || new Date();
     this.updatedAt = data.updatedAt || new Date();
@@ -154,6 +180,7 @@ class User {
       otp: this.otp,
       addresses: this.addresses,
       cart: this.cart,
+      healthProfile: this.healthProfile,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       _id: this._id

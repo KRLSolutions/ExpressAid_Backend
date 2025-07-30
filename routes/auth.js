@@ -210,6 +210,37 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// Test authentication endpoint
+router.get('/test-auth', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    console.log('🔍 Test auth endpoint called');
+    console.log('🔍 Authorization header:', req.headers.authorization);
+    console.log('🔍 Token:', token ? `${token.substring(0, 20)}...` : 'null');
+
+    if (!token) {
+      return res.status(401).json({ error: 'Token required' });
+    }
+
+    const decoded = jwt.verify(token, config.jwtSecret);
+    console.log('🔍 Decoded token:', decoded);
+
+    res.json({
+      success: true,
+      message: 'Authentication successful',
+      userId: decoded.userId,
+      phoneNumber: decoded.phoneNumber
+    });
+
+  } catch (error) {
+    console.error('Test auth error:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    res.status(500).json({ error: 'Authentication test failed' });
+  }
+});
+
 // Get user by userId (for auto-login)
 router.get('/user/:userId', async (req, res) => {
   try {

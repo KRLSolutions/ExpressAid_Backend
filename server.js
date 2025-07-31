@@ -107,7 +107,7 @@ app.use('/api/maps', require('./routes/maps'));
 
 // Import and use the Gemini chat route
 const geminiChat = require('./routes/gemini');
-app.use(geminiChat);
+app.use('/', geminiChat);
 
 // Add a route to list available Gemini models for debugging
 app.get('/api/gemini-models', async (req, res) => {

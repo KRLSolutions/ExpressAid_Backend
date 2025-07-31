@@ -3,7 +3,7 @@ const router = express.Router();
 const Nurse = require('../models/Nurse');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
-const { sendSMS } = require('../services/awsSnsService');
+const SmsServiceFactory = require('../services/smsServiceFactory');
 
 // Generate unique nurse ID
 const generateNurseId = () => {
@@ -57,8 +57,9 @@ router.post('/send-otp', async (req, res) => {
 
     // Send SMS
     try {
-      const messageId = await sendSMS(formattedPhone, `Your ExpressAid verification code is: ${otp}. Valid for 10 minutes.`);
-      console.log('✅ SMS sent via AWS SNS:', messageId);
+      const message = `Your ExpressAid verification code is: ${otp}. Valid for 10 minutes.`;
+      const smsResult = await SmsServiceFactory.sendSMS(formattedPhone, message);
+      console.log(`✅ SMS sent via ${smsResult.provider}:`, smsResult.messageId);
       console.log(`📱 OTP sent to ${formattedPhone}: ${otp}`);
     } catch (smsError) {
       console.error('SMS sending failed:', smsError);
@@ -91,12 +92,16 @@ router.post('/verify-otp', async (req, res) => {
 
     const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
     
-    // Find nurse
+    // Check if nurse exists in MongoDB
+    console.log(`🔍 [NURSE-AUTH] Looking for nurse with phone: ${formattedPhone}`);
     const nurse = await Nurse.findOne({ phoneNumber: formattedPhone });
     
     if (!nurse) {
-      return res.status(404).json({ error: 'Nurse not found' });
+      console.log(`❌ Nurse not found in MongoDB for phone: ${formattedPhone}`);
+      return res.status(404).json({ error: 'Nurse not found. Please request a new OTP' });
     }
+
+    console.log(`✅ Nurse found in MongoDB: ${nurse.nurseId} for phone: ${formattedPhone}`);
 
     // Check if OTP exists and is valid
     if (!nurse.otp || !nurse.otp.code || !nurse.otp.expiresAt) {

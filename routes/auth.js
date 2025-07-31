@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const config = require('../config');
-const twilioSmsService = require('../services/twilioSmsService');
+const SmsServiceFactory = require('../services/smsServiceFactory');
 const router = express.Router();
 
 // Generate OTP
@@ -25,10 +25,14 @@ router.post('/send-otp', async (req, res) => {
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Find or create user
+    console.log(`🔍 [SEND-OTP] Looking for existing user with phone: ${phoneNumber}`);
     let user = await User.findOne({ phoneNumber });
     
     if (!user) {
+      console.log(`🔍 [SEND-OTP] Creating new user for phone: ${phoneNumber}`);
       user = new User({ phoneNumber });
+    } else {
+      console.log(`🔍 [SEND-OTP] Found existing user: ${user.userId} for phone: ${phoneNumber}`);
     }
 
     // Update OTP
@@ -42,7 +46,7 @@ router.post('/send-otp', async (req, res) => {
 
     // Send OTP via SMS
     const message = `Your ExpressAid verification code is: ${otp}. Valid for 10 minutes.`;
-    const smsResult = await twilioSmsService.sendSMS(phoneNumber, message);
+    const smsResult = await SmsServiceFactory.sendSMS(phoneNumber, message);
 
     console.log(`📱 OTP sent to ${phoneNumber}: ${otp}`);
 
@@ -50,7 +54,7 @@ router.post('/send-otp', async (req, res) => {
       success: true,
       message: 'OTP sent successfully',
       phoneNumber: phoneNumber,
-      smsProvider: 'twilio',
+      smsProvider: smsResult.provider,
       messageId: smsResult.messageId
     });
 
@@ -69,11 +73,15 @@ router.post('/verify-otp', async (req, res) => {
       return res.status(400).json({ error: 'Phone number and OTP are required' });
     }
 
+    // Check if user exists in MongoDB
     const user = await User.findOne({ phoneNumber });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      console.log(`❌ User not found in MongoDB for phone: ${phoneNumber}`);
+      return res.status(404).json({ error: 'User not found. Please request a new OTP' });
     }
+
+    console.log(`✅ User found in MongoDB: ${user.userId} for phone: ${phoneNumber}`);
 
     if (!user.otp || !user.otp.code) {
       return res.status(400).json({ error: 'No OTP found. Please request a new OTP' });

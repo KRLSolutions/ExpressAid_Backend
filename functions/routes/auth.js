@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const config = require('../config');
-const twilioSmsService = require('../services/twilioSmsService');
+const SmsServiceFactory = require('../services/smsServiceFactory');
 const router = express.Router();
 
 // Generate OTP
@@ -51,7 +51,7 @@ router.post('/send-otp', async (req, res) => {
 
     // Send OTP via SMS
     const message = `Your ExpressAid verification code is: ${otp}. Valid for 10 minutes.`;
-    const smsResult = await twilioSmsService.sendSMS(phoneNumber, message);
+    const smsResult = await SmsServiceFactory.sendSMS(phoneNumber, message);
 
     console.log(`📱 OTP sent to ${phoneNumber}: ${otp}`);
 
@@ -59,7 +59,8 @@ router.post('/send-otp', async (req, res) => {
       success: true,
       message: 'OTP sent successfully',
       phoneNumber: phoneNumber,
-      smsProvider: smsResult.messageId.includes('console') ? 'console' : 'twilio'
+      smsProvider: smsResult.provider,
+      messageId: smsResult.messageId
     });
 
   } catch (error) {
@@ -77,6 +78,7 @@ router.post('/verify-otp', async (req, res) => {
       return res.status(400).json({ error: 'Phone number and OTP are required' });
     }
 
+    // Check if user exists in MongoDB
     console.log('🔍 Looking for user with phone number:', phoneNumber);
     const user = await User.findOne({ phoneNumber });
     console.log('🔍 User found:', user ? 'Yes' : 'No');
@@ -91,8 +93,11 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      console.log(`❌ User not found in MongoDB for phone: ${phoneNumber}`);
+      return res.status(404).json({ error: 'User not found. Please request a new OTP' });
     }
+
+    console.log(`✅ User found in MongoDB: ${user.userId} for phone: ${phoneNumber}`);
 
     if (!user.otp || !user.otp.code) {
       return res.status(400).json({ error: 'No OTP found. Please request a new OTP' });

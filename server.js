@@ -3,7 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoDBService = require('./models/MongoDBService');
-const twilioSmsService = require('./services/twilioSmsService');
+const SmsServiceFactory = require('./services/smsServiceFactory');
 const config = require('./config');
 const bodyParser = require('body-parser');
 
@@ -70,8 +70,8 @@ app.get('/api/health', (req, res) => {
       host: dbStatus.host || 'Local'
     },
     sms: {
-      provider: 'twilio',
-      configured: twilioSmsService.isConfigured()
+      provider: config.SMS_SERVICE,
+      configured: SmsServiceFactory.getSmsService().service.isConfigured()
     },
     timestamp: new Date().toISOString()
   });

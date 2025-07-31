@@ -5,7 +5,7 @@ const consoleSmsService = require('./consoleSmsService');
 
 class SmsServiceFactory {
   static getSmsService() {
-    const serviceType = config.SMS_SERVICE || 'console';
+    const serviceType = config.SMS_SERVICE || 'twilio';
     
     console.log(`📱 SMS Service Factory: Using ${serviceType} provider`);
     

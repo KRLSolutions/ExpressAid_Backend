@@ -50,7 +50,8 @@ router.post('/send-otp', async (req, res) => {
       success: true,
       message: 'OTP sent successfully',
       phoneNumber: phoneNumber,
-      smsProvider: smsResult.messageId.includes('console') ? 'console' : 'twilio'
+      smsProvider: 'twilio',
+      messageId: smsResult.messageId
     });
 
   } catch (error) {

@@ -2,19 +2,19 @@ require('dotenv').config();
 
 const config = {
   port: process.env.PORT || 5000,
-  jwtSecret: '057bed89eb41d8de095d6419121b9edc5685025a154893bb26c2dc41b65e67c7254cbe8202c4654deef8514fc158404ef6952736b54953ce0b4b2f484267853f',
+  jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret_here',
   environment: process.env.NODE_ENV || 'development',
   
-  // AWS SNS Configuration - Hardcoded for testing
+  // AWS SNS Configuration
   aws: {
-    accessKeyId: 'AKIAX2GA5I6XGINGEPWR',
-    secretAccessKey: 'V8+h8DeePyxlbAsMo9jVYi+3DuuY9XsSBRqdfMKp',
-    region: 'us-east-1'
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'your_access_key_here',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'your_secret_key_here',
+    region: process.env.AWS_REGION || 'us-east-1'
   },
   
-  // MongoDB Configuration - Hardcoded for testing
+  // MongoDB Configuration
   mongodb: {
-       uri: 'mongodb+srv://admin:LHONNmuaD6FzhAGO@cluster0.hibzkks.mongodb.net/expressaid?retryWrites=true&w=majority'
+    uri: process.env.MONGODB_URI || 'your_mongodb_atlas_connection_string'
   },
   
   // SMS Service
@@ -29,8 +29,8 @@ const config = {
   
   // Cashfree Configuration
   cashfree: {
-    appId: process.env.CASHFREE_APP_ID || 'TEST10393719a08909e07f6157a7221e91739301',
-    secretKey: process.env.CASHFREE_SECRET_KEY || 'cfsk_ma_test_d81a3c09420dcde848287e6b7aacfca5_3f2bf834',
+    appId: process.env.CASHFREE_APP_ID || 'your_cashfree_app_id_here',
+    secretKey: process.env.CASHFREE_SECRET_KEY || 'your_cashfree_secret_key_here',
     environment: process.env.CASHFREE_ENV || 'TEST'
   }
 };

@@ -10,20 +10,12 @@ class SmsServiceFactory {
     console.log(`📱 SMS Service Factory: Using ${serviceType} provider`);
     
     switch (serviceType.toLowerCase()) {
-      case 'twilio':
-        if (twilioSmsService.isConfigured()) {
-          console.log('✅ Twilio SMS service is configured and ready');
-          return {
-            service: twilioSmsService,
-            provider: 'twilio'
-          };
-        } else {
-          console.log('⚠️ Twilio not configured, falling back to console');
-          return {
-            service: consoleSmsService,
-            provider: 'console'
-          };
-        }
+             case 'twilio':
+         console.log('✅ Using Twilio SMS service');
+         return {
+           service: twilioSmsService,
+           provider: 'twilio'
+         };
         
       case 'aws-sns':
         if (awsSnsService.isConfigured()) {

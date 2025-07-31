@@ -1,0 +1,5 @@
+[33mcb5ce981[m[33m ([m[1;36mHEAD -> [m[1;32mFinal_branch[m[33m)[m Remove hardcoded secrets and use environment variables
+[33m7761d9ac[m firebase changes
+[33maa1ed8f9[m[33m ([m[1;31morigin/Final_branch[m[33m)[m error resolve
+[33m1e9003ff[m Update vercel.json
+[33m4acef0df[m vercel change

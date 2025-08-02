@@ -23,7 +23,7 @@ const config = {
   // Twilio Config
   twilio: {
     accountSid: 'AC886ff90ff2593fc4cd2147564ecec0ab',
-    authToken: 'f32e507c45ef16ca2ef5680bcb80b369',
+    authToken: '80859cfbb89d834cfd03591026647ed7',
     phoneNumber: '+19404882809'
   },
   

@@ -4,7 +4,8 @@ const mongoDBService = require('./MongoDBService');
 
 // Check if MongoDB is available
 const isMongoAvailable = () => {
-  return mongoDBService.isConnected();
+  // Check both MongoDBService and mongoose connection state
+  return mongoDBService.isConnected() || mongoose.connection.readyState === 1;
 };
 
 const userSchema = new mongoose.Schema({
